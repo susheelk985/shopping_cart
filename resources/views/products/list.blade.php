@@ -4,7 +4,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Products</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>SUSHEEL KUMAR R</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Open+Sans">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -207,6 +208,24 @@
             font-size: 14px;
             color: #ffc000;
         }
+
+        div#social-links {
+                margin: 0 auto;
+                max-width: 500px;
+                float:right;
+                padding-right:35px;
+            }
+            div#social-links ul li {
+                display: inline-block;
+            }          
+            div#social-links ul li a {
+                padding: 15px;
+                /* border: 1px solid #ccc; */
+                margin: 1px;
+                font-size: 30px;
+                color: #green;
+                /* background-color: #ccc; */
+            }
     </style>
     <!-- CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css">
@@ -214,10 +233,38 @@
     <!-- Script -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <!-- Toastr -->
+    <link rel="stylesheet" type="text/css"
+        href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+    <!-- Whatsapp share -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
 </head>
 
 <body>
     <br><br>
+    <div align="right" style="padding-right: 45px">
+        <?php
+        $cart_data_count = count(Session::get('cart_details'));
+        ?>
+        <tr>
+            <td>
+                <p><i class="fa fa-shopping-cart" style="font-size:48px;color:rgb(8, 102, 164)"></i><span
+                        class='cart_count' id="cart_count">{{ $cart_data_count }}</span></p>
+                        
+            </td>
+            <td></td>
+        </tr>
+
+    </div>
+    <div align="right" style="padding-right: 1px">
+        Share Cart items{!! $shareComponent !!} 
+
+    </div>
+    
+
     <div class="container-xl">
         <div class="row">
             @foreach ($categories as $category)
@@ -261,8 +308,8 @@
                                             </div>
                                         </div>
                                         <div class="col-sm-3">
-                                            <div class="thumb-wrapper viewdetails" data-id='{{ $product->id }}'>
-                                                <div class="img-box">
+                                            <div class="thumb-wrapper">
+                                                <div class="img-box viewdetails" data-id='{{ $product->id }}'>
                                                     <img src="{{ asset('storage/' . $product->image) }}"
                                                         class="img-fluid" alt="">
                                                 </div>
@@ -273,7 +320,8 @@
                                                         <b>{{ $product->special_price }}</b>
                                                     </p>
 
-                                                    <a href="#" class="btn btn-primary">Add to Cart</a>
+                                                    <a href="#" class="btn btn-primary add_to_cart"
+                                                        data-id='{{ $product->id }}'>Add to Cart</a>
                                                 </div>
                                             </div>
                                         </div>
@@ -324,6 +372,42 @@
                     });
                 }
             });
+
+        });
+
+        var cart_count = 0;
+        $("body").on("click", ".add_to_cart", function() {
+            var pid = $(this).attr('data-id');
+            cart_count = cart_count + 1;
+
+            // AJAX request
+
+            var url = "{{ route('add_to_cart') }}";
+            // url = url.replace(':pid', pid);
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': jQuery('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
+            $.ajax({
+
+                url: url,
+                method: 'POST',
+                dataType: 'json',
+                data: {
+                    id: pid,
+                },
+                success: function(cart_data) {
+                    // alert(JSON.stringify(cart_data));
+                    window.location.reload();
+                    toastr.success('Product successfully added!');
+                    console.log(cart_data);
+                    document.getElementById("cart_count").innerHTML = cart_count;
+                }
+            });
+
+
 
         });
     </script>

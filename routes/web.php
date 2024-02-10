@@ -18,4 +18,6 @@ use App\Http\Controllers\ProductController;
 //     return view('welcome');
 // });
 
-Route::resource('products', ProductController::class);
+Route::get('products', [ProductController::class,'index']);
+Route::get('products/{product}', [ProductController::class,'show'])->name('products.show');
+Route::post('add_to_cart', [ProductController::class,'add_to_cart'])->name('add_to_cart');
